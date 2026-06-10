@@ -51,17 +51,59 @@ def compare_unbounded(student_out, reference_out, filename):
   student_output_array = []
   while True:
     line1 = student_out.readline().rstrip().decode("utf-8", "namereplace")
+    while is_logisim_header(line1):
+      line1 = student_out.readline().rstrip().decode("utf-8", "namereplace")
     line2 = reference_out.readline().rstrip()
     if line2 == "":
       break
     student_output_array.append(line1)
-    m = re.match(line2, line1)
-    if m == None or m.start() != 0 or m.end() != len(line2):
+    normalized_line1 = normalize_table_line(line1)
+    normalized_line2 = normalize_table_line(line2)
+    m = re.match(normalized_line2, normalized_line1)
+    if m == None or m.start() != 0 or m.end() != len(normalized_line2):
       passed = False
   with open(filename, "w") as student_output:
     for line in student_output_array:
       student_output.write(line + "\n")
   return passed
+
+def is_logisim_header(line):
+  return line.strip().startswith("Test")
+
+def normalize_table_line(line):
+  fields = line.strip().split()
+  if not fields:
+    return line
+
+  # Newer Logisim prints table values in hex for buses and binary for small pins.
+  if fields[0].startswith("0x"):
+    widths_by_count = {
+      5: [8, 32, 4, 32, 32],
+      16: [8, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 5, 5, 5, 1, 32],
+    }
+    widths = widths_by_count.get(len(fields))
+    if widths is None:
+      return line
+    try:
+      return "\t".join(format_table_field(field, width) for field, width in zip(fields, widths))
+    except ValueError:
+      return line
+
+  # Reference files use tab-separated fields, with spaces inside binary groups.
+  tab_fields = line.strip().split("\t")
+  if len(tab_fields) > 1:
+    normalized_fields = [re.sub(r"\s+", "", field) for field in tab_fields]
+    if all(re.match(r"^[01]+$", field) for field in normalized_fields):
+      return "\t".join(normalized_fields)
+
+  return line
+
+def format_table_field(field, width):
+  if field.startswith("0x"):
+    value = int(field, 16)
+  else:
+    value = int(field, 2)
+  return format(value & ((1 << width) - 1), "0%db" % width)
 
 def run_test(group_path, test_slug, output_type=None):
   output_slug = test_slug
