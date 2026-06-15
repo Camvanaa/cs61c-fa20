@@ -238,6 +238,15 @@ end TCL_Generic;
       <a name="label" val="INSTRUCTION"/>
       <a name="width" val="32"/>
     </comp>
+    <comp lib="0" loc="(180,830)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="PROGRAM_COUNTER"/>
+      <a name="width" val="32"/>
+    </comp>
+    <comp lib="0" loc="(180,870)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="clk"/>
+    </comp>
     <comp lib="0" loc="(1810,130)" name="Tunnel">
       <a name="facing" val="east"/>
       <a name="label" val="WRITE_ADDRESS"/>
@@ -301,6 +310,10 @@ end TCL_Generic;
       <a name="facing" val="west"/>
       <a name="label" val="PROGRAM_COUNTER"/>
       <a name="output" val="true"/>
+      <a name="width" val="32"/>
+    </comp>
+    <comp lib="0" loc="(270,830)" name="Tunnel">
+      <a name="label" val="ex_pc"/>
       <a name="width" val="32"/>
     </comp>
     <comp lib="0" loc="(340,530)" name="Tunnel">
@@ -401,6 +414,12 @@ end TCL_Generic;
     </comp>
     <comp lib="4" loc="(190,610)" name="Register">
       <a name="appearance" val="logisim_evolution"/>
+      <a name="label" val="inst_reg"/>
+      <a name="width" val="32"/>
+    </comp>
+    <comp lib="4" loc="(190,800)" name="Register">
+      <a name="appearance" val="logisim_evolution"/>
+      <a name="label" val="ex_pc"/>
       <a name="width" val="32"/>
     </comp>
     <comp lib="4" loc="(230,500)" name="Register">
@@ -469,6 +488,8 @@ end TCL_Generic;
     <wire from="(1610,210)" to="(1650,210)"/>
     <wire from="(1650,90)" to="(1650,210)"/>
     <wire from="(180,640)" to="(190,640)"/>
+    <wire from="(180,830)" to="(190,830)"/>
+    <wire from="(180,870)" to="(190,870)"/>
     <wire from="(1810,130)" to="(1880,130)"/>
     <wire from="(1820,200)" to="(1880,200)"/>
     <wire from="(1820,270)" to="(1880,270)"/>
@@ -491,6 +512,7 @@ end TCL_Generic;
     <wire from="(2220,250)" to="(2220,330)"/>
     <wire from="(2220,50)" to="(2220,210)"/>
     <wire from="(250,640)" to="(350,640)"/>
+    <wire from="(250,830)" to="(270,830)"/>
     <wire from="(290,530)" to="(320,530)"/>
     <wire from="(320,430)" to="(320,530)"/>
     <wire from="(320,530)" to="(340,530)"/>
