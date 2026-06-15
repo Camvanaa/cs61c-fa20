@@ -68,7 +68,15 @@ def compare_unbounded(student_out, reference_out, filename):
   return passed
 
 def is_logisim_header(line):
-  return line.strip().startswith("Test")
+  stripped = line.strip()
+  if stripped.startswith("Test"):
+    return True
+  fields = stripped.split()
+  if not fields:
+    return False
+  # Newer Logisim versions print a table header containing pin names before
+  # the data rows. Data rows start with either hex values or binary digits.
+  return not re.match(r"^(0x[0-9a-fA-F]+|[01xX]+)$", fields[0])
 
 def normalize_table_line(line):
   fields = line.strip().split()
@@ -79,6 +87,7 @@ def normalize_table_line(line):
   if fields[0].startswith("0x"):
     widths_by_count = {
       5: [8, 32, 4, 32, 32],
+      11: [32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 16],
       16: [8, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 5, 5, 5, 1, 32],
     }
     widths = widths_by_count.get(len(fields))
