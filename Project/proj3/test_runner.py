@@ -50,10 +50,10 @@ def compare_unbounded(student_out, reference_out, filename):
   passed = True
   student_output_array = []
   while True:
-    line1 = student_out.readline().rstrip().decode("utf-8", "namereplace")
     line2 = reference_out.readline().rstrip()
     if line2 == "":
       break
+    line1 = read_student_data_line(student_out, line2)
     student_output_array.append(line1)
     m = re.match(line2, line1)
     if m == None or m.start() != 0 or m.end() != len(line2):
@@ -62,6 +62,60 @@ def compare_unbounded(student_out, reference_out, filename):
     for line in student_output_array:
       student_output.write(line + "\n")
   return passed
+
+def read_student_data_line(student_out, reference_line):
+  while True:
+    line = student_out.readline().rstrip().decode("utf-8", "namereplace")
+    normalized = normalize_student_line(line, reference_line)
+    if normalized is not None or line == "":
+      return normalized if normalized is not None else line
+
+def normalize_student_line(line, reference_line):
+  tokens = line.split()
+  if len(tokens) == 0:
+    return line
+  if not any(token.startswith("0x") or is_binary_token(token) for token in tokens):
+    return None
+  if not any(token.startswith("0x") for token in tokens):
+    return line
+
+  reference_columns = reference_line.split("\t")
+  if len(tokens) != len(reference_columns):
+    return line
+
+  normalized_columns = []
+  for token, reference_column in zip(tokens, reference_columns):
+    group_widths = [len(group) for group in reference_column.split()]
+    width = sum(group_widths)
+    bits = token_to_bits(token, width)
+    normalized_columns.append(group_bits(bits, group_widths))
+  return "\t".join(normalized_columns)
+
+def is_binary_token(token):
+  return re.match(r"^[01xXuUeE]+$", token) is not None
+
+def token_to_bits(token, width):
+  if token.startswith("0x"):
+    bits = "".join(hex_digit_to_bits(digit) for digit in token[2:])
+  else:
+    bits = token
+  if len(bits) < width:
+    bits = bits.rjust(width, "0")
+  return bits[-width:]
+
+def hex_digit_to_bits(digit):
+  try:
+    return format(int(digit, 16), "04b")
+  except ValueError:
+    return digit.lower() * 4
+
+def group_bits(bits, group_widths):
+  groups = []
+  index = 0
+  for width in group_widths:
+    groups.append(bits[index:index + width])
+    index += width
+  return " ".join(groups)
 
 def run_test(group_path, test_slug, output_type=None):
   output_slug = test_slug
